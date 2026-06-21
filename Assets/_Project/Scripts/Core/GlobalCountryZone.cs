@@ -1,16 +1,11 @@
 ﻿using UnityEngine;
 
-public enum CountryRegion
-{
-    Global, Thailand, China, Japan, Korea, Vietnam, MiddleEast
-}
-
 public class GlobalCountryZone : MonoBehaviour
 {
     [Header("Platform Space Setup")]
-    public CountryRegion region = CountryRegion.Global;
+    public CountryRegion region = CountryRegion.Thailand; // รอบนี้ตั้งต้นลองเป็นประเทศไทยดูเลยครับ!
     public string plotID;
-    public string currentTenant = "Premium Sneaker Shop"; 
+    public string currentTenant = "Siam Paragon Simulated Shop"; 
     public bool isRented = true; 
     public float monthlyRentPrice = 49.00f; 
 
@@ -25,7 +20,9 @@ public class GlobalCountryZone : MonoBehaviour
         
         vendorManager = GetComponent<ShopVendorManager>();
         
-        Debug.Log("[Virtual Mall] Plot ID: " + plotID + " (" + region + ") is active.");
+        // แปลงค่าเช่าที่ดินรายเดือนเป็นค่าเงินประจำชาตินั้น ๆ โชว์ตั้งแต่เปิดระบบ
+        string convertedRent = CurrencyConverter.GetConvertedPrice(monthlyRentPrice, region);
+        Debug.Log("[Virtual Mall] Plot ID: " + plotID + " (" + region + ") is active. Rent Price: " + convertedRent);
     }
 
     void Update()
@@ -49,14 +46,23 @@ public class GlobalCountryZone : MonoBehaviour
     {
         if (!isRented)
         {
-            Debug.Log("[Business UI] Space Available! Region: " + region + " | Price: $" + monthlyRentPrice);
+            string convertedRent = CurrencyConverter.GetConvertedPrice(monthlyRentPrice, region);
+            Debug.Log("[Business UI] Space Available! Region: " + region + " | Price: " + convertedRent);
         }
         else
         {
-            Debug.Log("[Storefront] ยินดีต้อนรับสู่ร้าน: " + currentTenant + " (โซน " + region + ")");
+            Debug.Log("[Storefront] ยินดีต้อนรับสู่ร้าน: " + currentTenant + " (โซนประเทศ: " + region + ")");
             
-            if (vendorManager != null)
+            if (vendorManager != null && vendorManager.inventory.Count > 0)
             {
+                // ดึงสินค้าชิ้นแรกออกมาราคากลาง 
+                var item = vendorManager.inventory[0];
+                
+                // สั่งแปลงค่าเงิน  ของสินค้าชิ้นนั้น ให้กลายเป็นเงินบาท หรือเงินประจำโซนประเทศทันที!
+                string localPriceText = CurrencyConverter.GetConvertedPrice(item.price, region);
+                
+                Debug.Log("[Currency Engine] แปลงค่าเงินสินค้า '" + item.productName + "' จากราคาฐาน $" + item.price + " -> กลายเป็นค่าเงินท้องถิ่น: " + localPriceText);
+                
                 vendorManager.AddToCart(0);
             }
         }
