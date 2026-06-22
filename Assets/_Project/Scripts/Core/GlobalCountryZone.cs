@@ -46,17 +46,12 @@ public class GlobalCountryZone : MonoBehaviour
                 var item = vendorManager.inventory[0];
                 string localPriceText = CurrencyConverter.GetConvertedPrice(item.price, region);
                 
-                // สั่งการยิงข้อมูลผ่านวงจรระบบ เข้าสู่หน้าต่าง UI ทันที!
+                // ยิงข้อมูลครบชุด: ชื่อร้าน, สัญชาติ, ราคาท้องถิ่น และ Enum ภูมิภาคเพื่อใช้เรียกคำพูด NPC
                 if (StorefrontUIManager.Instance != null)
                 {
-                    StorefrontUIManager.Instance.OpenShoppingApp(currentTenant, region.ToString(), localPriceText);
+                    StorefrontUIManager.Instance.OpenShoppingApp(currentTenant, region.ToString(), localPriceText, region);
                 }
-                else
-                {
-                    Debug.LogWarning("[Core] ไม่พบ StorefrontUIManager ในฉาก! กำลังพิมพ์ข้อความสำรองผ่าน Console...");
-                    Debug.Log($"[Storefront] ร้าน: {currentTenant} | ราคา: {localPriceText}");
-                }
-
+                
                 vendorManager.AddToCart(0);
             }
         }
