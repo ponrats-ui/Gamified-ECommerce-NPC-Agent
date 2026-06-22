@@ -68,8 +68,8 @@ public class StorefrontUIManager : MonoBehaviour
 
         virtualPhoneObject.SetActive(true);
 
-        // 🚀 สปีดความเร็วเหนือ Claude: ยิงยอดเงินสุทธิข้ามมิติทะลุเข้าสู่ระบบชำระเงินโลกจริงทันที!
-        CheckoutPaymentGateway.ProcessSecureCheckout(storeName, localDiscountedPriceText, assignedVoucher.code);
+        // ยิงข้อมูลเข้าสู่ Gateway พร้อมส่งตัวแปรสัญชาติและราคาลดพิเศษเพื่อลงระบบบัญชีและหักภาษีระดับโลก!
+        CheckoutPaymentGateway.ProcessSecureCheckout(storeName, localDiscountedPriceText, assignedVoucher.code, region, discountedBasePrice);
 
         string storeReport = StoreAIAgentManager.GenerateStoreReport(storeName, region, 1250f, 3);
         Debug.Log(storeReport);

@@ -2,8 +2,8 @@
 
 public class CheckoutPaymentGateway : MonoBehaviour
 {
-    // ฟังก์ชันประมวลผลจำลองการส่งข้อมูลไปตัดเงินจริงผ่านระบบธนาคารข้ามชาติ
-    public static void ProcessSecureCheckout(string storeName, string finalPriceText, string voucherUsed)
+    // อัปเดตฟังก์ชันให้รับค่าตัวแปรสัญชาติ และราคาฐานเพื่อนำไปหักภาษี
+    public static void ProcessSecureCheckout(string storeName, string finalPriceText, string voucherUsed, CountryRegion region, float finalPriceUSD)
     {
         Debug.Log($"\n=== 🔐 WEB3 / REAL-WORLD PAYMENT GATEWAY ===");
         Debug.Log($"[Gateway] รับยอดจากร้านค้า: {storeName.ToUpper()}");
@@ -12,5 +12,8 @@ public class CheckoutPaymentGateway : MonoBehaviour
         Debug.Log($"[Logistics API] 🚚 สั่งการสำเร็จ: แจ้งเตือนพัสดุเตรียมแพ็กของจัดส่งในโลกจริงเรียบร้อย!");
         Debug.Log($"[Transaction] STATUS: 🟢 Purchase Successful! (200 OK)");
         Debug.Log($"================================================\n");
+
+        // 🚀 ยิงข้อมูลทะลวงต่อไปยังระบบบัญชีและภาษีของประเทศนั้น ๆ ทันที!
+        GlobalMerchantLedger.RecordTransaction(storeName, region, finalPriceUSD);
     }
 }
