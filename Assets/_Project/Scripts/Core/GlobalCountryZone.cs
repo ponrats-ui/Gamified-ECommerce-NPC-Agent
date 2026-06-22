@@ -8,25 +8,10 @@ public class GlobalCountryZone : MonoBehaviour
     public float baseItemPrice;
     public StoreVisualTheme storeTheme;
 
-    private ShopVendorManager vendorManager;
-
-    public void SetupZone(string name, string regName, CountryRegion reg, float price, StoreVisualTheme theme)
-    {
-        storeName = name;
-        regionName = regName;
-        region = reg;
-        baseItemPrice = price;
-        storeTheme = theme;
-    }
-
-    void Start()
-    {
-        vendorManager = GetComponent<ShopVendorManager>();
-    }
-
-    // แก้ไขจุดตรวจจับคลิกเมาส์ให้วิ่งทะลวงเข้า Namespace 'Core' อย่างถูกระเบียบสากล
+    // ระบบตรวจจับคลิกเมาส์และยิงข้อมูลข้ามมิติเข้าหน้าจอ 3D และท่อส่งเงินโลกจริง
     void Update()
     {
+        // ตรวจสอบว่าระบบต้องอยู่ในสเตทเมือง (Overworld) เท่านั้นถึงจะคลิกตึกได้ ป้องกันการคลิกซ้อน
         if (Core.SceneStateManager.Instance != null && Core.SceneStateManager.Instance.currentState != Core.MallState.Overworld) return;
 
         if (Input.GetMouseButtonDown(0)) 
@@ -46,22 +31,19 @@ public class GlobalCountryZone : MonoBehaviour
 
     private void TriggerClickAction()
     {
-        if (vendorManager != null && vendorManager.inventory.Count > 0)
+        // ดึงค่าราคาฐาน (baseItemPrice) ที่ Spawner ป้อนให้มาคำนวณแปลงค่าเงินตราสัญชาตินั้น ๆ ทันที
+        string localPriceText = CurrencyConverter.GetConvertedPrice(baseItemPrice, region);
+        
+        // 1. สั่งยิงข้อมูลทะลวงตรงเข้าหน้าจอแอป 3D พร้อมประมวลผลคูปองและตัดเงิน Gateway
+        if (StorefrontUIManager.Instance != null)
         {
-            var item = vendorManager.inventory[0];
-            string localPriceText = CurrencyConverter.GetConvertedPrice(item.price, region);
-            
-            if (StorefrontUIManager.Instance != null)
-            {
-                StorefrontUIManager.Instance.OpenShoppingApp(storeName, region.ToString(), localPriceText, region, item.price);
-            }
-            
-            if (Core.SceneStateManager.Instance != null)
-            {
-                Core.SceneStateManager.Instance.SwitchState(Core.MallState.InsideShop);
-            }
-
-            vendorManager.AddToCart(0);
+            StorefrontUIManager.Instance.OpenShoppingApp(storeName, region.ToString(), localPriceText, region, baseItemPrice);
+        }
+        
+        // 2. สั่งกล้องดีดวาร์ปข้ามมิติลงห้องใต้ดินภายในร้านค้าย่อยทันที!
+        if (Core.SceneStateManager.Instance != null)
+        {
+            Core.SceneStateManager.Instance.SwitchState(Core.MallState.InsideShop);
         }
     }
 }
