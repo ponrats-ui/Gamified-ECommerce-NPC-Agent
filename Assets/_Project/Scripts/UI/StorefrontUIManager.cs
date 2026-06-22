@@ -10,22 +10,26 @@ public class StorefrontUIManager : MonoBehaviour
         else { Destroy(gameObject); }
     }
 
-    public void OpenShoppingApp(string storeName, string regionName, string itemPriceText, CountryRegion region)
+    public void OpenShoppingApp(string storeName, string regionName, string itemPriceText, CountryRegion region, float baseItemPrice)
     {
         string npcSpeech = NPCDialogueController.GetLocalizedWelcomeMessage(region, storeName);
 
         Debug.Log($"[UI Engine] ---- 📱 หน้าจอแอป SHOPPING เปิดใช้งาน ----");
         Debug.Log($"[UI Engine] ร้านค้า: {storeName} | ภูมิภาค: {regionName}");
         Debug.Log($"[NPC AI Speech] {npcSpeech}");
-        Debug.Log($"[UI Engine] สินค้าแนะนำ: Premium T-Shirt | ราคา: {itemPriceText}");
+        
+        // ---- 🎯 กลไกเสกความสนุก ล่าคูปอง Gamified Vouchers ----
+        var assignedVoucher = VoucherRewardSystem.GenerateRandomVoucher(region);
+        float discountedBasePrice = VoucherRewardSystem.CalculateDiscountedPrice(baseItemPrice, assignedVoucher.discountPercentage);
+        string localDiscountedPriceText = CurrencyConverter.GetConvertedPrice(discountedBasePrice, region);
+
+        Debug.Log($"[UI Engine] ราคาฐานตั้งต้น: {itemPriceText}");
+        Debug.Log($"[🛒 PROMO CHECKOUT] โค้ดที่ใช้: {assignedVoucher.code} | ราคาพิเศษหลังหักส่วนลด: {localDiscountedPriceText} 🔥");
         Debug.Log($"[UI Engine] ----------------------------------------");
 
-        // ---- จำลองข้อมูลหลังบ้านเพื่อส่งให้ AI Manager สรุปรายงานแดชบอร์ด ----
-        // สมมติสถานะ: ร้านนี้ขายของไปได้แล้ว ,250 และสินค้าชิ้นแรกในคลังเหลืออยู่ 3 ชิ้น (เข้าข่ายสต็อกวิกฤต)
+        // ---- จำลองระบบแดชบอร์ดส่งรายงานให้เจ้าของร้าน ----
         float simulatedTotalSales = 1250f;
         int simulatedStock = 3; 
-
-        // สั่งให้ AI Agent สรุปรายงานแดชบอร์ดส่งให้เจ้าของร้านทันที!
         string storeReport = StoreAIAgentManager.GenerateStoreReport(storeName, region, simulatedTotalSales, simulatedStock);
         Debug.Log(storeReport);
     }

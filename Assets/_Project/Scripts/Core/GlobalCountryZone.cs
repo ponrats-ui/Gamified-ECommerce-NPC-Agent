@@ -22,7 +22,6 @@ public class GlobalCountryZone : MonoBehaviour
 
     void Update()
     {
-        // ตรวจสอบว่าระบบต้องอยู่ในสเตทเมืองเท่านั้นถึงจะคลิกตึกได้ ป้องกันการคลิกซ้อน
         if (SceneStateManager.Instance != null && SceneStateManager.Instance.currentState != MallState.Overworld) return;
 
         if (Input.GetMouseButtonDown(0)) 
@@ -49,13 +48,12 @@ public class GlobalCountryZone : MonoBehaviour
                 var item = vendorManager.inventory[0];
                 string localPriceText = CurrencyConverter.GetConvertedPrice(item.price, region);
                 
-                // 1. สั่งเปิดแอป UI และ AI Manager
+                // ส่งตัวแปรราคาสินค้าฐานพ่วงท้ายเข้าไปในท่อ UI
                 if (StorefrontUIManager.Instance != null)
                 {
-                    StorefrontUIManager.Instance.OpenShoppingApp(currentTenant, region.ToString(), localPriceText, region);
+                    StorefrontUIManager.Instance.OpenShoppingApp(currentTenant, region.ToString(), localPriceText, region, item.price);
                 }
                 
-                // 2. สั่งกล้องสลับฉากวาร์ปเข้าห้องภายในร้านทันที!
                 if (SceneStateManager.Instance != null)
                 {
                     SceneStateManager.Instance.SwitchState(MallState.InsideShop);
