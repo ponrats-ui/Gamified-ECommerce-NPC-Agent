@@ -1,19 +1,13 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
 
 public class StorefrontUIManager : MonoBehaviour
 {
     public static StorefrontUIManager Instance { get; private set; }
 
-    [Header("UI Canvas Hierarchy")]
-    private GameObject canvasObject;
-    private GameObject appPanel;
-    private Text shopNameText;
-    private Text npcSpeechText;
-    private Text priceText;
-    private Text voucherText;
-    private Button backButton;
+    [Header("3D Phone Virtual Screen")]
+    private GameObject virtualPhoneObject;
+    private TextMesh titleTextMesh;
+    private TextMesh contentTextMesh;
 
     private void Awake()
     {
@@ -23,154 +17,74 @@ public class StorefrontUIManager : MonoBehaviour
 
     void Start()
     {
-        CreateDynamicCanvasFramework();
+        Create3DVirtualPhone();
     }
 
-    // 🏗️ มหากาพย์ฟังก์ชัน: สั่งเสกโครงสร้าง UI Canvas ทั้งหมดจากอากาศธาตุด้วยโค้ด 100%
-    private void CreateDynamicCanvasFramework()
+    // 🏗️ ปฏิวัติวงการ: สร้างหน้าจอจำลองด้วย 3D Primitives สยบบั๊ก Unity 6
+    private void Create3DVirtualPhone()
     {
-        // 1. สร้างวัตถุ Canvas หลัก
-        canvasObject = new GameObject("Dynamic_Shopping_Canvas");
-        Canvas canvas = canvasObject.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvasObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        canvasObject.AddComponent<GraphicRaycaster>();
-        canvasObject.transform.SetParent(this.transform);
+        // 1. สร้างบอร์ดป้ายหน้าจอ 3D ผืนผ้า
+        virtualPhoneObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        virtualPhoneObject.name = "Virtual_3D_Smartphone_Screen";
+        
+        // ติดตั้งตัวตรวจจับและตั้งพิกัดให้อยู่ตรงหน้ามุมกล้องภายในร้านพอดี!
+        virtualPhoneObject.transform.position = new Vector3(0f, -18.5f, 1f); 
+        virtualPhoneObject.transform.localScale = new Vector3(2.5f, 4f, 0.1f);
+        virtualPhoneObject.GetComponent<Renderer>().material.color = new Color(0.05f, 0.05f, 0.05f); // สีดำหรู
 
-        // 2. สร้างแผง Panel จำลองกรอบหน้าจอมือถือสี่เหลี่ยมแนวตั้ง (Smartphone Frame)
-        appPanel = new GameObject("Smartphone_Panel");
-        Image panelImage = appPanel.AddComponent<Image>();
-        panelImage.color = new Color(0.1f, 0.1f, 0.1.f, 0.95f); // สีดำหรูโปร่งแสงนิดๆ
-        RectTransform panelRect = appPanel.GetComponent<RectTransform>();
-        panelRect.SetParent(canvasObject.transform);
-        panelRect.anchorMin = new Vector2(0.5f, 0.5f);
-        panelRect.anchorMax = new Vector2(0.5f, 0.5f);
-        panelRect.pivot = new Vector2(0.5f, 0.5f);
-        panelRect.sizeDelta = new Vector2(400f, 650f); // อัตราส่วนหน้าจอมือถือแนวตั้งเป๊ะๆ
+        // 2. เสกข้อความลอยฟ้าหัวเรื่อง (Title 3D Text)
+        GameObject titleObj = new GameObject("3D_Title_Text");
+        titleObj.transform.SetParent(virtualPhoneObject.transform);
+        titleObj.transform.localPosition = new Vector3(-0.45f, 0.4f, -0.6f);
+        titleObj.transform.localScale = new Vector3(0.05f, 0.04f, 1f);
+        titleTextMesh = titleObj.AddComponent<TextMesh>();
+        titleTextMesh.fontSize = 60;
+        titleTextMesh.color = Color.cyan;
 
-        // สร้าง Font มาตรฐานชั่วคราว
-        Font arialFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        // 3. เสกข้อความรายละเอียดสินค้าและคูปอง (Content 3D Text)
+        GameObject contentObj = new GameObject("3D_Content_Text");
+        contentObj.transform.SetParent(virtualPhoneObject.transform);
+        contentObj.transform.localPosition = new Vector3(-0.45f, 0.2f, -0.6f);
+        contentObj.transform.localScale = new Vector3(0.04f, 0.035f, 1f);
+        contentTextMesh = contentObj.AddComponent<TextMesh>();
+        contentTextMesh.fontSize = 40;
+        contentTextMesh.color = Color.white;
 
-        // 3. เสกกล่องข้อความชื่อร้านค้า (Shop Title Text)
-        GameObject shopTitleObj = new GameObject("Text_ShopTitle");
-        shopNameText = shopTitleObj.AddComponent<Text>();
-        shopNameText.font = arialFont;
-        shopNameText.fontSize = 24;
-        shopNameText.alignment = TextAnchor.MiddleCenter;
-        shopNameText.color = Color.cyan;
-        RectTransform titleRect = shopTitleObj.GetComponent<RectTransform>();
-        titleRect.SetParent(appPanel.transform);
-        titleRect.anchoredPosition = new Vector3(0f, 270f, 0f);
-        titleRect.sizeDelta = new Vector2(350f, 50f);
-
-        // 4. เสกกล่องคำพูด NPC ประจำชาติ (NPC Speech Text)
-        GameObject npcTextObj = new GameObject("Text_NPCSpeech");
-        npcSpeechText = npcTextObj.AddComponent<Text>();
-        npcSpeechText.font = arialFont;
-        npcSpeechText.fontSize = 18;
-        npcSpeechText.alignment = TextAnchor.UpperLeft;
-        npcSpeechText.color = Color.white;
-        RectTransform npcRect = npcTextObj.GetComponent<RectTransform>();
-        npcRect.SetParent(appPanel.transform);
-        npcRect.anchoredPosition = new Vector3(0f, 150f, 0f);
-        npcRect.sizeDelta = new Vector2(350f, 120f);
-
-        // 5. เสกป้ายโชว์ราคาตั้งต้น (Price Text)
-        GameObject priceObj = new GameObject("Text_PriceDisplay");
-        priceText = priceObj.AddComponent<Text>();
-        priceText.font = arialFont;
-        priceText.fontSize = 20;
-        priceText.alignment = TextAnchor.MiddleCenter;
-        priceText.color = Color.gray;
-        RectTransform priceRect = priceObj.GetComponent<RectTransform>();
-        priceRect.SetParent(appPanel.transform);
-        priceRect.anchoredPosition = new Vector3(0f, 20f, 0f);
-        priceRect.sizeDelta = new Vector2(350f, 40f);
-
-        // 6. เสกป้ายคูปองและราคาลดพิเศษสายเดือด (Voucher & Discount Text)
-        GameObject voucherObj = new GameObject("Text_VoucherDisplay");
-        voucherText = voucherObj.AddComponent<Text>();
-        voucherText.font = arialFont;
-        voucherText.fontSize = 22;
-        voucherText.alignment = TextAnchor.MiddleCenter;
-        voucherText.color = Color.green;
-        RectTransform voucherRect = voucherObj.GetComponent<RectTransform>();
-        voucherRect.SetParent(appPanel.transform);
-        voucherRect.anchoredPosition = new Vector3(0f, -50f, 0f);
-        voucherRect.sizeDelta = new Vector2(350f, 50f);
-
-        // 7. เสกปุ่มกดปิด/ถอยกลับไปแผนที่เมือง (Back Button) ลอยเด่นขอบล่าง
-        GameObject btnObj = new GameObject("Button_BackToTown");
-        Image btnImage = btnObj.AddComponent<Image>();
-        btnImage.color = new Color(0.8f, 0.2f, 0.2f, 1f); // สีแดงโดดเด่น
-        backButton = btnObj.AddComponent<Button>();
-        RectTransform btnRect = btnObj.GetComponent<RectTransform>();
-        btnRect.SetParent(appPanel.transform);
-        btnRect.anchoredPosition = new Vector3(0f, -240f, 0f);
-        btnRect.sizeDelta = new Vector2(250f, 50f);
-
-        // เติมตัวอักษรใส่ปุ่มกด Back
-        GameObject btnTextObj = new GameObject("Text");
-        Text btnText = btnTextObj.AddComponent<Text>();
-        btnText.font = arialFont;
-        btnText.text = "CLOSE / BACK TO TOWN";
-        btnText.fontSize = 16;
-        btnText.alignment = TextAnchor.MiddleCenter;
-        btnText.color = Color.white;
-        btnText.GetComponent<RectTransform>().SetParent(btnObj.transform);
-        btnText.GetComponent<RectTransform>().anchoredPosition = Vector3.zero;
-
-        // ผูก Event ปุ่มกด ให้วิ่งไปสั่ง State Manager ถอยกลับเข้าเมืองทันทีเมื่อคลิก!
-        backButton.onClick.AddListener(() => {
-            if (UnityEngine.EventSystems.EventSystem.current != null)
-            {
-                // บังคับปลดโฟกัสปุ่มป้องกันบั๊กกดย้ำ
-                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
-            }
-            TriggerBackToTown();
-        });
-
-        // ตอนเริ่มเกม ให้ซ่อนหน้าต่างแอปมือถือไว้ก่อนชั่วคราว
-        appPanel.SetActive(false);
+        // ตอนเริ่มเกม ให้ซ่อนป้ายหน้าจอสมาร์ทโฟน 3D นี้ไว้ใต้ดินก่อน
+        virtualPhoneObject.SetActive(false);
     }
 
-    // 📱 ฟังก์ชันอัปเดตหน้าตา UI และสั่งแสดงผลบนจอจริงแบบ Real-time
+    // 📱 ฟังก์ชันยิงข้อมูลอัปเดตหน้าจอแอป 3D
     public void OpenShoppingApp(string storeName, string regionName, string itemPriceText, CountryRegion region, float baseItemPrice)
     {
-        if (appPanel == null) return;
+        if (virtualPhoneObject == null) return;
 
-        // ดึงระบบจำลองคำพูดและระบบคูปองส่วนลดหลังบ้านมาประมวลผล
         string npcSpeech = NPCDialogueController.GetLocalizedWelcomeMessage(region, storeName);
         var assignedVoucher = VoucherRewardSystem.GenerateRandomVoucher(region);
         float discountedBasePrice = VoucherRewardSystem.CalculateDiscountedPrice(baseItemPrice, assignedVoucher.discountPercentage);
         string localDiscountedPriceText = CurrencyConverter.GetConvertedPrice(discountedBasePrice, region);
 
-        // พ่นข้อมูลลงสู่ Text Component บนหน้าจอจริงของยูสเซอร์!
-        shopNameText.text = storeName.ToUpper();
-        npcSpeechText.text = npcSpeech;
-        priceText.text = $"ราคาตั้งต้น: {itemPriceText}";
-        voucherText.text = $"โค้ด: {assignedVoucher.code} ลดเหลือ {localDiscountedPriceText} 🔥";
+        // แสดงผลข้อความลอยฟ้าของจริงบนโลก 3D!
+        titleTextMesh.text = storeName.ToUpper();
+        
+        // ตัดบรรทัดข้อความให้แสดงผลสวยงามบนป้าย 3D
+        contentTextMesh.text = $"[ZONE: {regionName}]\n\n" +
+                               $"NPC: {npcSpeech.Substring(0, Mathf.Min(npcSpeech.Length, 35))}...\n\n" +
+                               $"Original Price: {itemPriceText}\n" +
+                               $"Voucher Code: {assignedVoucher.code}\n" +
+                               $"PROMO PRICE: {localDiscountedPriceText} 🔥\n\n" +
+                               $"--> CLICK RIGHT MOUSE OR BACKSPACE\n" +
+                               $"    TO RETURN TO TOWN";
 
-        // เปิดสวิตช์แสดงหน้าจอแอปมือถือลอยขึ้นมา!
-        appPanel.SetActive(true);
+        virtualPhoneObject.SetActive(true);
 
-        // พ่น Log รายงานแดชบอร์ด AI ควบคู่ไปด้วย
+        // รายงานภาพรวมแดชบอร์ด POS ของ AI Manager ควบคู่
         string storeReport = StoreAIAgentManager.GenerateStoreReport(storeName, region, 1250f, 3);
         Debug.Log(storeReport);
     }
 
-    private void TriggerBackToTown()
-    {
-        appPanel.SetActive(false);
-        if (Core.SceneStateManager.Instance != null)
-        {
-            Core.SceneStateManager.Instance.SwitchState(Core.MallState.Overworld);
-        }
-    }
-
-    // ฟังก์ชันเปิดทางให้ State Manager สั่งซ่อนหน้าจอได้กรณีผู้เล่นกดคลิกขวาถอยหลัง
     public void HideCanvasApp()
     {
-        if (appPanel != null) appPanel.SetActive(false);
+        if (virtualPhoneObject != null) virtualPhoneObject.SetActive(false);
     }
 }
