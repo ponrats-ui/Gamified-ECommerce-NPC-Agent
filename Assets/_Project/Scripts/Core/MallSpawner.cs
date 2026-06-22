@@ -1,47 +1,53 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class MallSpawner : MonoBehaviour
 {
+    private string[] storeNames = { "Siam Paragon Pop-Up", "Beijing Silk Market", "Shibuya Trends", "Gangnam Beauty Lab", "Dubai Luxury Mall" };
+    private CountryRegion[] regions = { CountryRegion.Thailand, CountryRegion.China, CountryRegion.Japan, CountryRegion.Korea, CountryRegion.MiddleEast };
+    private float[] basePrices = { 800f, 150f, 3500f, 32000f, 500f };
+
     void Start()
     {
-        // รายชื่อโซนประเทศที่เราจะส่ง AI ไปเปิดตลาดรวดเดียวจบ
-        CountryRegion[] regionsToSpawn = { 
-            CountryRegion.Thailand, 
-            CountryRegion.China, 
-            CountryRegion.Japan, 
-            CountryRegion.Korea, 
-            CountryRegion.MiddleEast 
-        };
+        SpawnInternationalPlots();
+    }
 
-        string[] shopNames = { 
-            "Siam Paragon Pop-up", 
-            "Beijing Silk Market", 
-            "Akihabara Anime Hub", 
-            "Gangnam Beauty Lab", 
-            "Dubai Luxury Boutique" 
-        };
+    private void SpawnInternationalPlots()
+    {
+        float startX = -6f;
+        float spacing = 3.0f;
 
-        // ลูปอัจฉริยะ: สั่งสร้างตึกและผูกสคริปต์อัตโนมัติ โดยเว้นระยะห่างตึกละ 2 เมตร
-        for (int i = 0; i < regionsToSpawn.Length; i++)
+        for (int i = 0; i < storeNames.Length; i++)
         {
-            // 1. เสกกล่อง Cube เปล่า ๆ ขึ้นมากลางอากาศ
-            GameObject newPlot = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            newPlot.name = "Automated_Plot_" + regionsToSpawn[i];
+            GameObject plot = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            plot.name = $"Automated_Plot_{regions[i]}";
+            plot.transform.position = new Vector3(startX + (i * spacing), 0f, 0f);
+            plot.transform.rotation = Quaternion.Euler(0f, 25f, 0f);
+
+            var zoneData = plot.AddComponent<GlobalCountryZone>();
             
-            // 2. จัดวางตำแหน่งแบบเรียงหน้ากระดาน (X ขยับไปเรื่อย ๆ)
-            newPlot.transform.position = new Vector3((i - 2) * 2.5f, 0.5f, 0f);
-
-            // 3. ยัดไส้ระบบ E-Commerce (ShopVendorManager) เข้าไปในตึกทันที
-            ShopVendorManager vendor = newPlot.AddComponent<ShopVendorManager>();
-            vendor.vendorName = shopNames[i];
-
-            // 4. ยัดไส้ระบบทวีป (GlobalCountryZone) เข้าไปควบคุมต่อ
-            GlobalCountryZone zone = newPlot.AddComponent<GlobalCountryZone>();
-            zone.region = regionsToSpawn[i];
-            zone.currentTenant = shopNames[i];
-            zone.isRented = true; // เปิดระบบพร้อมช้อปปิ้งทันทีทุกตึก!
+            // สุ่มธีมตกแต่งให้ตึกสัญชาติต่างๆ ตามโมเดลธุรกิจ
+            StoreVisualTheme assignedTheme = (StoreVisualTheme)(i % 4);
+            
+            zoneData.SetupZone(storeNames[i], GetRegionName(regions[i]), regions[i], basePrices[i], assignedTheme);
+            
+            // สั่งตัวจัดการสกินให้ทาสีเปลี่ยนโฉมตึกทันที
+            StoreThemeManager.ApplyThemeToStore(plot, assignedTheme);
         }
 
-        Debug.Log($"[AI Master Spawner] ประสบความสำเร็จ! เสกตึกร้านค้าข้ามชาติ 5 ประเทศเข้าสู่ระบบเรียบร้อย!");
+        Debug.Log("[AI Master Spawner] ประสบความสำเร็จ! เสกตึกร้านค้าข้ามชาติ 5 ประเทศพร้อมธีมระเบียบเรียบร้อย!");
+    }
+
+    private string GetRegionName(CountryRegion region)
+    {
+        switch (region)
+        {
+            case CountryRegion.Thailand: return "Thailand (TH)";
+            case CountryRegion.China: return "China (CN)";
+            case CountryRegion.Japan: return "Japan (JP)";
+            case CountryRegion.Korea: return "Korea (KR)";
+            case CountryRegion.MiddleEast: return "Middle East (UAE)";
+            default: return "Global Zone";
+        }
     }
 }

@@ -2,64 +2,56 @@
 
 public class GlobalCountryZone : MonoBehaviour
 {
-    [Header("Platform Space Setup")]
-    public CountryRegion region = CountryRegion.Thailand; 
-    public string plotID;
-    public string currentTenant = "Siam Paragon Simulated Shop"; 
-    public bool isRented = true; 
-    public float monthlyRentPrice = 49.00f; 
+    public string storeName;
+    public string regionName;
+    public CountryRegion region;
+    public float baseItemPrice;
+    public StoreVisualTheme storeTheme; // เพิ่มตัวแปรเก็บข้อมูลสกินของแบรนด์
 
-    private ShopVendorManager vendorManager;
+    private bool isPlayerInside = false;
 
-    void Start()
+    public void SetupZone(string name, string regName, CountryRegion reg, float price, StoreVisualTheme theme)
     {
-        if (string.IsNullOrEmpty(plotID))
+        storeName = name;
+        regionName = regName;
+        region = reg;
+        baseItemPrice = price;
+        storeTheme = theme;
+    }
+
+    private void OnMouseDown()
+    {
+        TriggerClickAction();
+    }
+
+    public void TriggerClickAction()
+    {
+        if (SceneStateManager.Instance.CurrentState == MallState.Overworld)
         {
-            plotID = "PLOT-" + System.Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+            SceneStateManager.Instance.SwitchState(MallState.InsideShop);
+            
+            string formattedPrice = CurrencyConverter.GetConvertedPrice(baseItemPrice, region);
+            
+            // ส่งค่าธีมของร้านเข้าไปที่ UI ระบบ App ด้วย
+            StorefrontUIManager.Instance.OpenShoppingApp(storeName, regionName, formattedPrice, region, baseItemPrice);
         }
-        vendorManager = GetComponent<ShopVendorManager>();
     }
 
     void Update()
     {
-        if (Core.SceneStateManager.Instance != null && Core.SceneStateManager.Instance.currentState != Core.MallState.Overworld) return;
-
-        if (Input.GetMouseButtonDown(0)) 
+        if (SceneStateManager.Instance.CurrentState == MallState.InsideShop && Input.GetMouseButtonDown(1))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                if (hit.transform == this.transform)
-                {
-                    TriggerClickAction();
-                }
-            }
+            ReturnToOverworld();
+        }
+        if (SceneStateManager.Instance.CurrentState == MallState.InsideShop && Input.GetKeyDown(KeyCode.Backspace))
+        {
+            ReturnToOverworld();
         }
     }
 
-    private void TriggerClickAction()
+    private void ReturnToOverworld()
     {
-        if (isRented)
-        {
-            if (vendorManager != null && vendorManager.inventory.Count > 0)
-            {
-                var item = vendorManager.inventory[0];
-                string localPriceText = CurrencyConverter.GetConvertedPrice(item.price, region);
-                
-                if (StorefrontUIManager.Instance != null)
-                {
-                    StorefrontUIManager.Instance.OpenShoppingApp(currentTenant, region.ToString(), localPriceText, region, item.price);
-                }
-                
-                if (Core.SceneStateManager.Instance != null)
-                {
-                    Core.SceneStateManager.Instance.SwitchState(Core.MallState.InsideShop);
-                }
-
-                vendorManager.AddToCart(0);
-            }
-        }
+        SceneStateManager.Instance.SwitchState(MallState.Overworld);
+        StorefrontUIManager.Instance.HideCanvasApp();
     }
 }
