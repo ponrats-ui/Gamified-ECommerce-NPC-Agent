@@ -1,55 +1,60 @@
 ﻿using UnityEngine;
 
-public enum MallState { Overworld, InsideShop }
-
-public class SceneStateManager : MonoBehaviour
+namespace Core
 {
-    public static SceneStateManager Instance { get; private set; }
-    
-    public MallState currentState = MallState.Overworld;
-    
-    private Vector3 originalCameraPos;
-    private Quaternion originalCameraRot;
+    public enum MallState { Overworld, InsideShop }
 
-    private void Awake()
+    public class SceneStateManager : MonoBehaviour
     {
-        if (Instance == null) { Instance = this; }
-    }
+        public static SceneStateManager Instance { get; private set; }
+        
+        public MallState currentState = MallState.Overworld;
+        
+        private Vector3 originalCameraPos;
+        private Quaternion originalCameraRot;
 
-    void Start()
-    {
-        // จดจำตำแหน่งกล้องหลักในวิวเมืองไว้ก่อน
-        originalCameraPos = Camera.main.transform.position;
-        originalCameraRot = Camera.main.transform.rotation;
-    }
-
-    // ฟังก์ชันสั่งสลับฉากข้ามมิติ
-    public void SwitchState(MallState newState)
-    {
-        currentState = newState;
-
-        if (currentState == MallState.InsideShop)
+        private void Awake()
         {
-            // วาร์ปกล้องหลักลงมาโฟกัสที่ห้องภายในร้านค้าย่อยด้านล่างทันที!
-            Camera.main.transform.position = new Vector3(0f, -18.5f, -4f);
-            Camera.main.transform.rotation = Quaternion.Euler(15f, 0f, 0f);
-            Debug.Log("[State Switcher] 🎬 กล้องสลับเข้าสเตท: INSIDE SHOP (ภายในหน้าร้าน)");
+            if (Instance == null) { Instance = this; }
         }
-        else
-        {
-            // ดึงกล้องกลับไปที่วิวเมืองตามเดิม
-            Camera.main.transform.position = originalCameraPos;
-            Camera.main.transform.rotation = originalCameraRot;
-            Debug.Log("[State Switcher] 🎬 กล้องถอยกลับเข้าสเตท: OVERWORLD (แผนที่เมือง)");
-        }
-    }
 
-    void Update()
-    {
-        // ปุ่มลัดทางเลือก: กดปุ่ม Backspace หรือคลิกขวา เพื่อกดออกจากร้านค้าถอยกลับไปที่เมือง
-        if (currentState == MallState.InsideShop && (Input.GetKeyDown(KeyCode.Backspace) || Input.GetMouseButtonDown(1)))
+        void Start()
         {
-            SwitchState(MallState.Overworld);
+            originalCameraPos = Camera.main.transform.position;
+            originalCameraRot = Camera.main.transform.rotation;
+        }
+
+        public void SwitchState(MallState newState)
+        {
+            currentState = newState;
+
+            if (currentState == MallState.InsideShop)
+            {
+                Camera.main.transform.position = new Vector3(0f, -18.5f, -4f);
+                Camera.main.transform.rotation = Quaternion.Euler(15f, 0f, 0f);
+                Debug.Log("[State Switcher] 🎬 กล้องสลับเข้าสเตท: INSIDE SHOP");
+            }
+            else
+            {
+                Camera.main.transform.position = originalCameraPos;
+                Camera.main.transform.rotation = originalCameraRot;
+                Debug.Log("[State Switcher] 🎬 กล้องถอยกลับเข้าสเตท: OVERWORLD");
+                
+                // สั่งให้ระบบ UI ซ่อนตัวเองเมื่อถอยกลับเข้าเมือง
+                if (StorefrontUIManager.Instance != null)
+                {
+                    StorefrontUIManager.Instance.HideCanvasApp();
+                }
+            }
+        }
+
+        void Update()
+        {
+            // หากผู้เล่นกดคลิกขวา หรือ Backspace ให้สั่งถอยหลังกลับและปิด UI ทันที
+            if (currentState == MallState.InsideShop && (Input.GetKeyDown(KeyCode.Backspace) || Input.GetMouseButtonDown(1)))
+            {
+                SwitchState(MallState.Overworld);
+            }
         }
     }
 }

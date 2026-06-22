@@ -22,7 +22,7 @@ public class GlobalCountryZone : MonoBehaviour
 
     void Update()
     {
-        if (SceneStateManager.Instance != null && SceneStateManager.Instance.currentState != MallState.Overworld) return;
+        if (Core.SceneStateManager.Instance != null && Core.SceneStateManager.Instance.currentState != Core.MallState.Overworld) return;
 
         if (Input.GetMouseButtonDown(0)) 
         {
@@ -48,15 +48,14 @@ public class GlobalCountryZone : MonoBehaviour
                 var item = vendorManager.inventory[0];
                 string localPriceText = CurrencyConverter.GetConvertedPrice(item.price, region);
                 
-                // ส่งตัวแปรราคาสินค้าฐานพ่วงท้ายเข้าไปในท่อ UI
                 if (StorefrontUIManager.Instance != null)
                 {
                     StorefrontUIManager.Instance.OpenShoppingApp(currentTenant, region.ToString(), localPriceText, region, item.price);
                 }
                 
-                if (SceneStateManager.Instance != null)
+                if (Core.SceneStateManager.Instance != null)
                 {
-                    SceneStateManager.Instance.SwitchState(MallState.InsideShop);
+                    Core.SceneStateManager.Instance.SwitchState(Core.MallState.InsideShop);
                 }
 
                 vendorManager.AddToCart(0);
