@@ -6,9 +6,9 @@ public class GlobalCountryZone : MonoBehaviour
     public string regionName;
     public CountryRegion region;
     public float baseItemPrice;
-    public StoreVisualTheme storeTheme; // เพิ่มตัวแปรเก็บข้อมูลสกินของแบรนด์
+    public StoreVisualTheme storeTheme;
 
-    private bool isPlayerInside = false;
+    private ShopVendorManager vendorManager;
 
     public void SetupZone(string name, string regName, CountryRegion reg, float price, StoreVisualTheme theme)
     {
@@ -19,39 +19,49 @@ public class GlobalCountryZone : MonoBehaviour
         storeTheme = theme;
     }
 
-    private void OnMouseDown()
+    void Start()
     {
-        TriggerClickAction();
+        vendorManager = GetComponent<ShopVendorManager>();
     }
 
-    public void TriggerClickAction()
-    {
-        if (SceneStateManager.Instance.CurrentState == MallState.Overworld)
-        {
-            SceneStateManager.Instance.SwitchState(MallState.InsideShop);
-            
-            string formattedPrice = CurrencyConverter.GetConvertedPrice(baseItemPrice, region);
-            
-            // ส่งค่าธีมของร้านเข้าไปที่ UI ระบบ App ด้วย
-            StorefrontUIManager.Instance.OpenShoppingApp(storeName, regionName, formattedPrice, region, baseItemPrice);
-        }
-    }
-
+    // แก้ไขจุดตรวจจับคลิกเมาส์ให้วิ่งทะลวงเข้า Namespace 'Core' อย่างถูกระเบียบสากล
     void Update()
     {
-        if (SceneStateManager.Instance.CurrentState == MallState.InsideShop && Input.GetMouseButtonDown(1))
+        if (Core.SceneStateManager.Instance != null && Core.SceneStateManager.Instance.currentState != Core.MallState.Overworld) return;
+
+        if (Input.GetMouseButtonDown(0)) 
         {
-            ReturnToOverworld();
-        }
-        if (SceneStateManager.Instance.CurrentState == MallState.InsideShop && Input.GetKeyDown(KeyCode.Backspace))
-        {
-            ReturnToOverworld();
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (hit.transform == this.transform)
+                {
+                    TriggerClickAction();
+                }
+            }
         }
     }
 
-    private void ReturnToOverworld()
+    private void TriggerClickAction()
     {
-        SceneStateManager.Instance.SwitchState(MallState.Overworld);
-        StorefrontUIManager.Instance.HideCanvasApp();
+        if (vendorManager != null && vendorManager.inventory.Count > 0)
+        {
+            var item = vendorManager.inventory[0];
+            string localPriceText = CurrencyConverter.GetConvertedPrice(item.price, region);
+            
+            if (StorefrontUIManager.Instance != null)
+            {
+                StorefrontUIManager.Instance.OpenShoppingApp(storeName, region.ToString(), localPriceText, region, item.price);
+            }
+            
+            if (Core.SceneStateManager.Instance != null)
+            {
+                Core.SceneStateManager.Instance.SwitchState(Core.MallState.InsideShop);
+            }
+
+            vendorManager.AddToCart(0);
+        }
     }
 }
