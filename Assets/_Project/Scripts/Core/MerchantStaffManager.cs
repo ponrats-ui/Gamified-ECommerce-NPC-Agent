@@ -24,20 +24,23 @@ public class MerchantStaffManager : MonoBehaviour
 {
     public static MerchantStaffManager Instance { get; private set; }
     
-    // คลังเก็บรายชื่อลูกน้อง AI ที่เราจ้างมาใช้งาน
     public List<AIAgentStaff> hiredStaffList = new List<AIAgentStaff>();
 
     private void Awake()
     {
-        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
-        else { Destroy(gameObject); }
-    }
-
-    void Start()
-    {
-        // เริ่มต้นระบบ: อนุมัติจ้างลูกน้อง 2 ตำแหน่งแรกตามคำสั่ง Founder คุณคอม
-        HireNewStaff("Nong Som (น้องส้ม)", StaffRole.FrontDeskSupport, 150f);
-        HireNewStaff("Khun Kitti (คุณกิตติ)", StaffRole.TaxAuditor, 300f);
+        if (Instance == null) 
+        { 
+            Instance = this; 
+            DontDestroyOnLoad(gameObject);
+            
+            // 🚀 ย้ายมาอยู่ที่นี่! บังคับให้ลูกน้องลงทะเบียนเข้าทำงานทันทีที่เปิดเกม ไร้ดีเลย์ 100%
+            HireNewStaff("Nong Som (น้องส้ม)", StaffRole.FrontDeskSupport, 150f);
+            HireNewStaff("Khun Kitti (คุณกิตติ)", StaffRole.TaxAuditor, 300f);
+        }
+        else 
+        { 
+            Destroy(gameObject); 
+        }
     }
 
     public void HireNewStaff(string name, StaffRole role, float salary)
@@ -48,10 +51,13 @@ public class MerchantStaffManager : MonoBehaviour
         Debug.Log($"[HR Engine] 👥 บอร์ดจัดจ้างอนุมัติสำเร็จ: รับ '{name}' เข้าทำงานในตำแหน่ง [{role}] (ค่าจ้าง: {salary} Gold/ชม.)");
     }
 
-    // ฟังก์ชันกระจายงาน: ให้ลูกน้องออกมาทำหน้าที่แทนคุณพี
     public void DelegateTasksToStaff()
     {
         Debug.Log($"\n=== 📊 REPORT: AI AGENT STAFF DELEGATION ===");
+        if (hiredStaffList.Count == 0)
+        {
+            Debug.Log("[HR Warning] ยังไม่มีพนักงานในระบบ!");
+        }
         foreach (var staff in hiredStaffList)
         {
             if (staff.role == StaffRole.FrontDeskSupport)
