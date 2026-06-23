@@ -12,22 +12,19 @@ public class MallSpawner : MonoBehaviour
         SpawnInternationalPlots();
     }
 
-    // 🏛️ เสกตึกสำนักงานใหญ่ส่วนกลาง (HQ) แหล่งศูนย์รวม Information ประจำเมือง
     private void SpawnMegaMallHQ()
     {
         GameObject hqPlot = GameObject.CreatePrimitive(PrimitiveType.Cube);
         hqPlot.name = "MEGA_MALL_HEADQUARTERS";
-        hqPlot.transform.position = new Vector3(0f, 2f, 0f); // ตั้งเด่นตระหง่านตรงกลางด้านบน
-        hqPlot.transform.localScale = new Vector3(2f, 2.5f, 2f); // ขนาดใหญ่สมฐานะออฟฟิศผู้บริหาร
+        hqPlot.transform.position = new Vector3(0f, 2f, 0f); 
+        hqPlot.transform.localScale = new Vector3(2f, 2.5f, 2f); 
 
-        // บรรจุระบบตรวจจับคลิก
         var zoneData = hqPlot.AddComponent<GlobalCountryZone>();
         zoneData.SetupZone("Mega Mall HQ", "Global Center", CountryRegion.Thailand, 0f, StoreVisualTheme.LuxuryGold);
         
-        // ลงสีทองคำสุดหรูหรา
         StoreThemeManager.ApplyThemeToStore(hqPlot, StoreVisualTheme.LuxuryGold);
 
-        // 🤵 อัญเชิญคอมโพเนนต์ คุณพี (CSO Agent) ฝังลงในตึกนี้!
+        // 🤵 บรรจุอวตารคุณพี (CSO) เข้าไปสถิต
         hqPlot.AddComponent<CSOAgentController>();
 
         Debug.Log("[HQ System] 🏛️ สำนักงานใหญ่ส่วนกลางและอวตารคุณพี (CSO) ถูกสร้างเสร็จสมบูรณ์!");

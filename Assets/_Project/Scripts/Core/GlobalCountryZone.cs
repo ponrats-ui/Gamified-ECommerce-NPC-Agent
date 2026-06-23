@@ -8,6 +8,16 @@ public class GlobalCountryZone : MonoBehaviour
     public float baseItemPrice;
     public StoreVisualTheme storeTheme;
 
+    // 🏗️ ฟังก์ชันสะพานเชื่อมข้อมูลที่ Spawner เรียกใช้
+    public void SetupZone(string name, string regName, CountryRegion reg, float price, StoreVisualTheme theme)
+    {
+        storeName = name;
+        regionName = regName;
+        region = reg;
+        baseItemPrice = price;
+        storeTheme = theme;
+    }
+
     void Update()
     {
         if (Core.SceneStateManager.Instance != null && Core.SceneStateManager.Instance.currentState != Core.MallState.Overworld) return;
@@ -29,11 +39,10 @@ public class GlobalCountryZone : MonoBehaviour
 
     private void TriggerClickAction()
     {
-        // 🤵 ดักจับพิเศษ: ถ้าเป็นตึกสำนักงานใหญ่ ให้คุณพี (CSO) ออกมาพูดคุยให้คำปรึกษาทันที!
+        // 🤵 ดักจับพิเศษ: ถ้ามีคอมโพเนนต์ คุณพี (CSO) ติดอยู่ ให้ทำงานทักทายทันที
         CSOAgentController csoAgent = GetComponent<CSOAgentController>();
         if (csoAgent != null)
         {
-            // จำลองการดักจับสเตตัส (เช่น เป็นนักช้อปทั่วไปเข้ามาขอข้อมูลคำสั่งไอเท็ม)
             csoAgent.InteractWithFounder(UserType.CasualShopper);
         }
 
