@@ -8,6 +8,14 @@ public class MallSpawner : MonoBehaviour
 
     void Start()
     {
+        // 🚀 บังคับเสก Object ตัวจัดการพนักงาน AI ขึ้นมาในเกมทันที ถ้าระบบยังไม่มีอยู่จริง!
+        if (FindObjectOfType<MerchantStaffManager>() == null)
+        {
+            GameObject staffManagerObj = new GameObject("_MerchantStaffManager");
+            staffManagerObj.AddComponent<MerchantStaffManager>();
+            Debug.Log("[HQ System] 👥 สถาบันจัดจ้างฝ่ายบุคคล (MerchantStaffManager) ถูกเสกเข้าสู่ระบบอัตโนมัติ!");
+        }
+
         SpawnMegaMallHQ();
         SpawnInternationalPlots();
     }
