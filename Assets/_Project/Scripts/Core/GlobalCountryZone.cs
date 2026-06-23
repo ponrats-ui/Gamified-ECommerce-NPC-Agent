@@ -8,7 +8,7 @@ public class GlobalCountryZone : MonoBehaviour
     public float baseItemPrice;
     public StoreVisualTheme storeTheme;
 
-    // 🏗️ ฟังก์ชันสะพานเชื่อมข้อมูลที่ Spawner เรียกใช้
+    // 🏗️ ฟังก์ชันสะพานเชื่อมข้อมูล (ล็อกให้อยู่ถาวร ห้ามหายเด็ดขาด!)
     public void SetupZone(string name, string regName, CountryRegion reg, float price, StoreVisualTheme theme)
     {
         storeName = name;
@@ -39,11 +39,17 @@ public class GlobalCountryZone : MonoBehaviour
 
     private void TriggerClickAction()
     {
-        // 🤵 ดักจับพิเศษ: ถ้ามีคอมโพเนนต์ คุณพี (CSO) ติดอยู่ ให้ทำงานทักทายทันที
+        // 🤵 ตรวจจับพิเศษ: หากคลิกตึกสำนักงานใหญ่สีทอง
         CSOAgentController csoAgent = GetComponent<CSOAgentController>();
         if (csoAgent != null)
         {
             csoAgent.InteractWithFounder(UserType.CasualShopper);
+            
+            // 🚀 สั่งการให้ลูกน้อง AI ออกมารายงานทำหน้าที่ทันที
+            if (MerchantStaffManager.Instance != null)
+            {
+                MerchantStaffManager.Instance.DelegateTasksToStaff();
+            }
         }
 
         string localPriceText = CurrencyConverter.GetConvertedPrice(baseItemPrice, region);
