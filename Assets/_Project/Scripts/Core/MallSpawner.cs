@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 public class MallSpawner : MonoBehaviour
 {
@@ -9,7 +8,29 @@ public class MallSpawner : MonoBehaviour
 
     void Start()
     {
+        SpawnMegaMallHQ();
         SpawnInternationalPlots();
+    }
+
+    // 🏛️ เสกตึกสำนักงานใหญ่ส่วนกลาง (HQ) แหล่งศูนย์รวม Information ประจำเมือง
+    private void SpawnMegaMallHQ()
+    {
+        GameObject hqPlot = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        hqPlot.name = "MEGA_MALL_HEADQUARTERS";
+        hqPlot.transform.position = new Vector3(0f, 2f, 0f); // ตั้งเด่นตระหง่านตรงกลางด้านบน
+        hqPlot.transform.localScale = new Vector3(2f, 2.5f, 2f); // ขนาดใหญ่สมฐานะออฟฟิศผู้บริหาร
+
+        // บรรจุระบบตรวจจับคลิก
+        var zoneData = hqPlot.AddComponent<GlobalCountryZone>();
+        zoneData.SetupZone("Mega Mall HQ", "Global Center", CountryRegion.Thailand, 0f, StoreVisualTheme.LuxuryGold);
+        
+        // ลงสีทองคำสุดหรูหรา
+        StoreThemeManager.ApplyThemeToStore(hqPlot, StoreVisualTheme.LuxuryGold);
+
+        // 🤵 อัญเชิญคอมโพเนนต์ คุณพี (CSO Agent) ฝังลงในตึกนี้!
+        hqPlot.AddComponent<CSOAgentController>();
+
+        Debug.Log("[HQ System] 🏛️ สำนักงานใหญ่ส่วนกลางและอวตารคุณพี (CSO) ถูกสร้างเสร็จสมบูรณ์!");
     }
 
     private void SpawnInternationalPlots()
@@ -25,17 +46,11 @@ public class MallSpawner : MonoBehaviour
             plot.transform.rotation = Quaternion.Euler(0f, 25f, 0f);
 
             var zoneData = plot.AddComponent<GlobalCountryZone>();
-            
-            // สุ่มธีมตกแต่งให้ตึกสัญชาติต่างๆ ตามโมเดลธุรกิจ
             StoreVisualTheme assignedTheme = (StoreVisualTheme)(i % 4);
             
             zoneData.SetupZone(storeNames[i], GetRegionName(regions[i]), regions[i], basePrices[i], assignedTheme);
-            
-            // สั่งตัวจัดการสกินให้ทาสีเปลี่ยนโฉมตึกทันที
             StoreThemeManager.ApplyThemeToStore(plot, assignedTheme);
         }
-
-        Debug.Log("[AI Master Spawner] ประสบความสำเร็จ! เสกตึกร้านค้าข้ามชาติ 5 ประเทศพร้อมธีมระเบียบเรียบร้อย!");
     }
 
     private string GetRegionName(CountryRegion region)

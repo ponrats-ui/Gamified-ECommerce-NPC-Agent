@@ -8,20 +8,8 @@ public class GlobalCountryZone : MonoBehaviour
     public float baseItemPrice;
     public StoreVisualTheme storeTheme;
 
-    // 🏗️ ฟังก์ชันสะพานเชื่อมหลักที่ระบบ Spawner เรียกใช้ (ใส่กลับมาให้ครบถ้วนแล้ว!)
-    public void SetupZone(string name, string regName, CountryRegion reg, float price, StoreVisualTheme theme)
-    {
-        storeName = name;
-        regionName = regName;
-        region = reg;
-        baseItemPrice = price;
-        storeTheme = theme;
-    }
-
-    // ระบบตรวจจับคลิกเมาส์และยิงข้อมูลข้ามมิติเข้าหน้าจอ 3D และท่อส่งเงินโลกจริง
     void Update()
     {
-        // ตรวจสอบว่าระบบต้องอยู่ในสเตทเมือง (Overworld) เท่านั้นถึงจะคลิกตึกได้ ป้องกันการคลิกซ้อน
         if (Core.SceneStateManager.Instance != null && Core.SceneStateManager.Instance.currentState != Core.MallState.Overworld) return;
 
         if (Input.GetMouseButtonDown(0)) 
@@ -41,16 +29,21 @@ public class GlobalCountryZone : MonoBehaviour
 
     private void TriggerClickAction()
     {
-        // แปลงค่าราคาฐาน (baseItemPrice) เป็นเงินตราท้องถิ่นข้ามสัญชาติ
+        // 🤵 ดักจับพิเศษ: ถ้าเป็นตึกสำนักงานใหญ่ ให้คุณพี (CSO) ออกมาพูดคุยให้คำปรึกษาทันที!
+        CSOAgentController csoAgent = GetComponent<CSOAgentController>();
+        if (csoAgent != null)
+        {
+            // จำลองการดักจับสเตตัส (เช่น เป็นนักช้อปทั่วไปเข้ามาขอข้อมูลคำสั่งไอเท็ม)
+            csoAgent.InteractWithFounder(UserType.CasualShopper);
+        }
+
         string localPriceText = CurrencyConverter.GetConvertedPrice(baseItemPrice, region);
         
-        // 1. สั่งยิงข้อมูลทะลวงตรงเข้าหน้าจอแอป 3D พร้อมประมวลผลคูปองและสรุปบัญชี
         if (StorefrontUIManager.Instance != null)
         {
-            StorefrontUIManager.Instance.OpenShoppingApp(storeName, region.ToString(), localPriceText, region, baseItemPrice);
+            StorefrontUIManager.Instance.OpenShoppingApp(storeName, regionName, localPriceText, region, baseItemPrice);
         }
         
-        // 2. สั่งกล้องดีดวาร์ปข้ามมิติลงห้องใต้ดินภายในร้านค้าย่อยทันที
         if (Core.SceneStateManager.Instance != null)
         {
             Core.SceneStateManager.Instance.SwitchState(Core.MallState.InsideShop);
